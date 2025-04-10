@@ -1,0 +1,499 @@
+/* 3D Card Effects */
+.card-3d {
+    transform-style: preserve-3d;
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    backface-visibility: hidden;
+    perspective: 1000px;
+    position: relative;
+}
+
+.card-3d::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(45deg, rgba(251, 191, 36, 0.1), transparent);
+    opacity: 0;
+    transition: opacity 0.4s ease;
+    border-radius: inherit;
+}
+
+.card-3d:hover::after {
+    opacity: 1;
+}
+
+.card-3d:hover {
+    transform: translateY(-10px) rotateX(5deg) rotateY(5deg);
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+}
+
+/* Floating Animation */
+.floating {
+    animation: float 3s ease-in-out infinite;
+    transform-style: preserve-3d;
+    filter: drop-shadow(0 10px 15px rgba(0, 0, 0, 0.1));
+}
+
+@keyframes float {
+    0% {
+        transform: translateY(0px) translateZ(0) rotate(0deg);
+    }
+    50% {
+        transform: translateY(-10px) translateZ(10px) rotate(2deg);
+    }
+    100% {
+        transform: translateY(0px) translateZ(0) rotate(0deg);
+    }
+}
+
+/* Hero Text Animation */
+.hero-text {
+    position: relative;
+    display: inline-block;
+    transform-style: preserve-3d;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.hero-text::after {
+    content: '';
+    position: absolute;
+    width: 100%;
+    height: 2px;
+    bottom: -5px;
+    left: 0;
+    background: linear-gradient(90deg, transparent, #FBBF24, transparent);
+    transform: scaleX(0);
+    transform-origin: bottom right;
+    transition: transform 0.3s ease-out;
+    box-shadow: 0 0 10px rgba(251, 191, 36, 0.5);
+}
+
+.hero-text:hover::after {
+    transform: scaleX(1);
+    transform-origin: bottom left;
+}
+
+/* Menu Item Hover Effects */
+.menu-item {
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+    overflow: hidden;
+    transform-style: preserve-3d;
+    perspective: 1000px;
+}
+
+.menu-item::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(45deg, rgba(251, 191, 36, 0.2), transparent);
+    opacity: 0;
+    transition: opacity 0.4s ease;
+    z-index: 1;
+}
+
+.menu-item:hover::before {
+    opacity: 1;
+}
+
+.menu-item img {
+    transition: transform 0.5s ease-in-out;
+    transform-style: preserve-3d;
+    filter: brightness(1);
+}
+
+.menu-item:hover img {
+    transform: scale(1.1) translateZ(20px);
+    filter: brightness(1.1);
+}
+
+/* Button Hover Effects */
+button {
+    position: relative;
+    overflow: hidden;
+    transform-style: preserve-3d;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    background: linear-gradient(45deg, #FBBF24, #F59E0B);
+}
+
+button::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 0;
+    height: 0;
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 50%;
+    transform: translate(-50%, -50%);
+    transition: width 0.6s ease, height 0.6s ease;
+    z-index: 1;
+}
+
+button:hover::after {
+    width: 300px;
+    height: 300px;
+}
+
+button:hover {
+    transform: translateY(-3px) translateZ(10px);
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+    background: linear-gradient(45deg, #F59E0B, #FBBF24);
+}
+
+/* Smooth Scroll Behavior */
+html {
+    scroll-behavior: smooth;
+}
+
+/* Loading Animation */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(20px) translateZ(-20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0) translateZ(0);
+    }
+}
+
+.animate-fade-in {
+    animation: fadeIn 0.6s ease-out forwards;
+    transform-style: preserve-3d;
+}
+
+/* Enhanced Hero Section */
+.hero-section {
+    position: relative;
+    overflow: hidden;
+    perspective: 1000px;
+}
+
+.hero-section::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(45deg, rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.3));
+    z-index: 1;
+    transform: translateZ(-10px);
+    animation: gradientShift 10s ease infinite;
+}
+
+@keyframes gradientShift {
+    0% {
+        background-position: 0% 50%;
+    }
+    50% {
+        background-position: 100% 50%;
+    }
+    100% {
+        background-position: 0% 50%;
+    }
+}
+
+.hero-content {
+    position: relative;
+    z-index: 2;
+    transform-style: preserve-3d;
+}
+
+/* Enhanced Navigation */
+nav {
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    transform-style: preserve-3d;
+    transition: all 0.3s ease;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+nav:hover {
+    background: rgba(255, 255, 255, 0.95);
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+}
+
+/* Scroll Progress Indicator */
+.scroll-progress {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 3px;
+    background: linear-gradient(90deg, #FBBF24, #F59E0B);
+    transform-origin: left;
+    transform: scaleX(0);
+    transition: transform 0.2s ease;
+    z-index: 1000;
+    box-shadow: 0 0 10px rgba(251, 191, 36, 0.5);
+}
+
+/* Enhanced Loading Screen */
+.loading-screen {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(45deg, #ffffff, #f3f4f6);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 9999;
+    transition: opacity 0.5s ease, visibility 0.5s ease;
+}
+
+.loading-animation {
+    width: 50px;
+    height: 50px;
+    border: 3px solid #f3f3f3;
+    border-top: 3px solid #FBBF24;
+    border-radius: 50%;
+    animation: spin 1s linear infinite, pulse 2s ease-in-out infinite;
+}
+
+@keyframes pulse {
+    0% {
+        transform: scale(1) rotate(0deg);
+    }
+    50% {
+        transform: scale(1.1) rotate(180deg);
+    }
+    100% {
+        transform: scale(1) rotate(360deg);
+    }
+}
+
+/* Enhanced Special Offers */
+.special-offer {
+    position: relative;
+    overflow: hidden;
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    transform-style: preserve-3d;
+    background: linear-gradient(135deg, #ffffff, #f8fafc);
+}
+
+.special-offer::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(45deg, rgba(251, 191, 36, 0.2), transparent);
+    opacity: 0;
+    transition: opacity 0.4s ease;
+    z-index: 1;
+}
+
+.special-offer:hover {
+    transform: translateY(-10px) scale(1.02);
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+}
+
+.special-offer:hover::before {
+    opacity: 1;
+}
+
+/* Enhanced Contact Form */
+.contact-input {
+    transition: all 0.3s ease;
+    border: 1px solid #e2e8f0;
+    background: linear-gradient(to bottom, #ffffff, #f8fafc);
+}
+
+.contact-input:focus {
+    border-color: #FBBF24;
+    box-shadow: 0 0 0 3px rgba(251, 191, 36, 0.2);
+    transform: translateY(-2px);
+    background: #ffffff;
+}
+
+/* Footer Enhancements */
+.footer-link {
+    position: relative;
+    transition: all 0.3s ease;
+    color: #e2e8f0;
+}
+
+.footer-link::after {
+    content: '';
+    position: absolute;
+    width: 0;
+    height: 2px;
+    bottom: -2px;
+    left: 0;
+    background: linear-gradient(90deg, #FBBF24, #F59E0B);
+    transition: width 0.3s ease;
+}
+
+.footer-link:hover {
+    color: #FBBF24;
+}
+
+.footer-link:hover::after {
+    width: 100%;
+}
+
+/* Mobile Menu Enhancements */
+.mobile-menu-item {
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+    padding-left: 1.5rem;
+}
+
+.mobile-menu-item::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 4px;
+    height: 100%;
+    background: linear-gradient(to bottom, #FBBF24, #F59E0B);
+    transform: scaleY(0);
+    transition: transform 0.3s ease;
+}
+
+.mobile-menu-item:hover {
+    background: rgba(251, 191, 36, 0.1);
+    padding-left: 2rem;
+}
+
+.mobile-menu-item:hover::before {
+    transform: scaleY(1);
+}
+
+/* Enhanced Price Tags */
+.price-tag {
+    position: relative;
+    overflow: hidden;
+    padding: 0.25rem 0.75rem;
+    border-radius: 9999px;
+    background: linear-gradient(45deg, rgba(251, 191, 36, 0.1), transparent);
+}
+
+.price-tag::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: radial-gradient(circle, rgba(251, 191, 36, 0.2) 0%, transparent 70%);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.price-tag:hover::before {
+    opacity: 1;
+}
+
+/* Enhanced Category Buttons */
+.category-btn {
+    position: relative;
+    overflow: hidden;
+    transition: all 0.3s ease;
+    background: linear-gradient(45deg, rgba(251, 191, 36, 0.1), transparent);
+}
+
+.category-btn::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(45deg, rgba(251, 191, 36, 0.2), transparent);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.category-btn:hover::before {
+    opacity: 1;
+}
+
+/* Mobile Experience Improvements */
+@media (max-width: 768px) {
+    .card-3d:hover {
+        transform: translateY(-5px);
+    }
+    
+    .menu-item:hover img {
+        transform: scale(1.05);
+    }
+    
+    .floating {
+        animation: float 4s ease-in-out infinite;
+    }
+    
+    .hero-text::after {
+        height: 1px;
+    }
+    
+    .mobile-menu-item {
+        padding: 0.75rem 1rem;
+    }
+    
+    .mobile-menu-item:hover {
+        padding-left: 1.5rem;
+    }
+}
+
+/* Print Styles */
+@media print {
+    .cursor-glow,
+    .scroll-progress,
+    button::after,
+    .menu-item::before,
+    .hero-text::after,
+    .special-offer::before,
+    .footer-link::after,
+    .mobile-menu-item::before,
+    .loading-screen,
+    .price-tag::before,
+    .category-btn::before {
+        display: none !important;
+    }
+    
+    .card-3d,
+    .menu-item,
+    button,
+    .hero-section,
+    nav,
+    .floating,
+    .hero-text,
+    .animate-fade-in,
+    .parallax,
+    .glass-effect,
+    .text-reveal,
+    .image-hover,
+    .special-offer,
+    .contact-input,
+    .footer-link,
+    .mobile-menu-item,
+    .price-tag,
+    .category-btn {
+        transform: none !important;
+        transition: none !important;
+        animation: none !important;
+        box-shadow: none !important;
+    }
+    
+    body {
+        color: #000;
+        background: #fff;
+    }
+    
+    a {
+        text-decoration: underline;
+    }
+    
+    img {
+        max-width: 100%;
+    }
+} 

@@ -6,6 +6,9 @@
     <title>Delicious Cafe</title>
     <script src="https://unpkg.com/lucide@latest"></script>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/ScrollTrigger.min.js"></script>
     <style>
         html {
             scroll-behavior: smooth;
@@ -14,93 +17,461 @@
             color: #facc15;
             transition: all 0.3s ease;
         }
+        /* Mobile Menu Styles */
+        .mobile-menu {
+            display: none;
+        }
+        @media (max-width: 768px) {
+            .mobile-menu {
+                display: block;
+            }
+            .desktop-menu {
+                display: none;
+            }
+        }
+        /* 3D Effects */
+        .card-3d {
+            transform-style: preserve-3d;
+            transition: transform 0.5s ease;
+        }
+        .card-3d:hover {
+            transform: translateY(-10px) rotateX(5deg);
+        }
+        .floating {
+            animation: float 6s ease-in-out infinite;
+        }
+        @keyframes float {
+            0% { transform: translateY(0px); }
+            50% { transform: translateY(-20px); }
+            100% { transform: translateY(0px); }
+        }
+        .parallax {
+            transform: translateZ(0);
+            transition: transform 0.3s ease;
+        }
+        .menu-item {
+            transition: all 0.3s ease;
+        }
+        .menu-item:hover {
+            transform: scale(1.05) translateY(-5px);
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+        }
+        .hero-text {
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+        }
+        .glass-effect {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        /* New Styles */
+        .sticky-header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+            transition: all 0.3s ease;
+        }
+        .sticky-header.scrolled {
+            background: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(10px);
+        }
+        .section-padding {
+            padding: 5rem 0;
+        }
+        .section-title {
+            position: relative;
+            display: inline-block;
+            margin-bottom: 2rem;
+        }
+        .section-title::after {
+            content: '';
+            position: absolute;
+            bottom: -10px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 50px;
+            height: 3px;
+            background: #facc15;
+        }
+        .category-btn.active {
+            background: #facc15;
+            color: black;
+        }
+        .menu-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+        }
+        .cart-badge {
+            position: absolute;
+            top: -8px;
+            right: -8px;
+            background: #facc15;
+            color: black;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+        }
+        .loading-animation {
+            width: 50px;
+            height: 50px;
+            border: 5px solid #f3f3f3;
+            border-top: 5px solid #facc15;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        .scroll-progress {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 3px;
+            background: #facc15;
+            transform-origin: left;
+            transform: scaleX(0);
+            z-index: 1001;
+        }
+        .cursor-glow {
+            position: fixed;
+            width: 20px;
+            height: 20px;
+            background: rgba(251, 191, 36, 0.5);
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: 9999;
+            transition: all 0.3s ease;
+        }
     </style>
 </head>
-<body>
+<body class="bg-gray-100">
+    <!-- Loading Screen -->
+    <div class="loading-screen fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+        <div class="loading-animation"></div>
+    </div>
+
+    <!-- Cursor Effect -->
+    <div class="cursor-glow"></div>
+    
+    <!-- Scroll Progress Indicator -->
+    <div class="scroll-progress"></div>
+    
     <div class="min-h-screen bg-white">
+        <!-- Sticky Header -->
+        <header class="sticky-header">
+            <nav class="relative z-10 flex justify-between items-center px-4 md:px-8 py-4 glass-effect">
+                <div class="flex items-center">
+                    <i data-lucide="coffee" class="h-8 w-8 text-yellow-400 floating"></i>
+                    <span class="ml-2 text-xl md:text-2xl font-bold text-white">Delicious Cafe</span>
+                </div>
+                <!-- Desktop Menu -->
+                <div class="hidden md:flex space-x-8 text-white desktop-menu">
+                    <a href="#home" class="hover-yellow transition-all duration-300">Home</a>
+                    <a href="#about" class="hover-yellow transition-all duration-300">About</a>
+                    <a href="#menu" class="hover-yellow transition-all duration-300">Menu</a>
+                    <a href="#contact" class="hover-yellow transition-all duration-300">Contact</a>
+                    <a href="#account" class="hover-yellow transition-all duration-300">Account</a>
+                    <a href="#cart" class="hover-yellow transition-all duration-300 flex items-center relative">
+                        <i data-lucide="shopping-cart" class="h-5 w-5 mr-1"></i>
+                        <span id="cart-count" class="cart-badge">0</span>
+                    </a>
+                </div>
+                <!-- Mobile Menu Button -->
+                <button class="mobile-menu p-2 text-white" onclick="toggleMobileMenu()">
+                    <i data-lucide="menu" class="h-6 w-6"></i>
+                </button>
+            </nav>
+
+            <!-- Mobile Menu Dropdown -->
+            <div id="mobileMenu" class="hidden relative z-20 bg-black bg-opacity-90 w-full text-white py-4 glass-effect">
+                <a href="#home" class="block px-4 py-2 hover-yellow transition-all duration-300 mobile-menu-item">Home</a>
+                <a href="#about" class="block px-4 py-2 hover-yellow transition-all duration-300 mobile-menu-item">About</a>
+                <a href="#menu" class="block px-4 py-2 hover-yellow transition-all duration-300 mobile-menu-item">Menu</a>
+                <a href="#contact" class="block px-4 py-2 hover-yellow transition-all duration-300 mobile-menu-item">Contact</a>
+                <a href="#account" class="block px-4 py-2 hover-yellow transition-all duration-300 mobile-menu-item">Account</a>
+                <a href="#cart" class="block px-4 py-2 hover-yellow transition-all duration-300 mobile-menu-item flex items-center">
+                    <i data-lucide="shopping-cart" class="h-5 w-5 mr-1"></i>
+                    <span id="mobile-cart-count" class="cart-badge">0</span>
+                </a>
+            </div>
+        </header>
+
         <!-- Hero Section -->
-        <header class="relative h-screen">
+        <section id="home" class="relative h-screen overflow-hidden hero-section">
             <div 
-                class="absolute inset-0 bg-cover bg-center"
+                class="absolute inset-0 bg-cover bg-center parallax image-hover"
                 style="background-image: url('https://images.unsplash.com/photo-1554118811-1e0d58224f24?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=2047&q=80');"
             >
                 <div class="absolute inset-0 bg-black bg-opacity-50"></div>
             </div>
             
-            <nav class="relative z-10 flex justify-between items-center px-8 py-6">
-                <div class="flex items-center">
-                    <i data-lucide="coffee" class="h-8 w-8 text-yellow-400"></i>
-                    <span class="ml-2 text-2xl font-bold text-white">Delicious Cafe</span>
-                </div>
-                <div class="hidden md:flex space-x-8 text-white">
-                    <a href="#home" class="hover-yellow">Home</a>
-                    <a href="#about" class="hover-yellow">About</a>
-                    <a href="#menu" class="hover-yellow">Menu</a>
-                    <a href="#contact" class="hover-yellow">Contact</a>
-                </div>
-            </nav>
-
-            <div class="relative z-10 flex flex-col items-center justify-center h-full text-center px-4">
-                <h1 class="text-5xl md:text-7xl font-bold text-white mb-6">Welcome to Delicious Cafe</h1>
-                <p class="text-xl text-gray-200 mb-8">Experience the finest coffee and cuisine in town</p>
-                <button onclick="scrollToMenu()" class="bg-yellow-400 text-black px-8 py-3 rounded-full font-semibold hover:bg-yellow-500 transition">
+            <div class="relative z-10 flex flex-col items-center justify-center h-full text-center px-4 hero-content">
+                <h1 class="text-4xl md:text-7xl font-bold text-white mb-6 hero-text floating text-reveal">Welcome to Delicious Cafe</h1>
+                <p class="text-lg md:text-xl text-gray-200 mb-8 hero-text text-reveal" style="transition-delay: 0.2s;">Experience the finest coffee and cuisine in town</p>
+                <button onclick="scrollToMenu()" class="bg-yellow-400 text-black px-6 md:px-8 py-3 rounded-full font-semibold hover:bg-yellow-500 transition-all duration-300 transform hover:scale-105 hover:shadow-lg text-reveal" style="transition-delay: 0.4s;">
                     View Menu
                 </button>
             </div>
-        </header>
+        </section>
 
         <!-- Features Section -->
-        <section class="py-20 bg-gray-50">
+        <section class="section-padding bg-white">
             <div class="container mx-auto px-4">
+                <h2 class="text-4xl font-bold text-center section-title">Why Choose Us</h2>
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
-                    <div class="text-center">
-                        <i data-lucide="clock" class="w-12 h-12 mx-auto text-yellow-400 mb-4"></i>
+                    <div class="card-3d bg-white p-8 rounded-lg shadow-lg text-center animate-fade-in text-reveal special-offer" style="animation-delay: 0.2s;">
+                        <i data-lucide="clock" class="w-12 h-12 mx-auto text-yellow-400 mb-4 floating"></i>
                         <h3 class="text-xl font-semibold mb-2">Open Hours</h3>
                         <p class="text-gray-600">Mon-Fri: 8AM - 10PM</p>
                         <p class="text-gray-600">Sat-Sun: 9AM - 11PM</p>
                     </div>
-                    <div class="text-center">
-                        <i data-lucide="map-pin" class="w-12 h-12 mx-auto text-yellow-400 mb-4"></i>
+                    <div class="card-3d bg-white p-8 rounded-lg shadow-lg text-center animate-fade-in text-reveal special-offer" style="animation-delay: 0.4s;">
+                        <i data-lucide="map-pin" class="w-12 h-12 mx-auto text-yellow-400 mb-4 floating"></i>
                         <h3 class="text-xl font-semibold mb-2">Location</h3>
-                        <p class="text-gray-600">123 Coffee Street</p>
-                        <p class="text-gray-600">Cairo, Egypt</p>
+                        <p class="text-gray-600">Mall of Egypt - 5th Settlement</p>
+                        <p class="text-gray-600">First Floor, Sadat City</p>
                     </div>
-                    <div class="text-center">
-                        <i data-lucide="phone" class="w-12 h-12 mx-auto text-yellow-400 mb-4"></i>
+                    <div class="card-3d bg-white p-8 rounded-lg shadow-lg text-center animate-fade-in text-reveal special-offer" style="animation-delay: 0.6s;">
+                        <i data-lucide="phone" class="w-12 h-12 mx-auto text-yellow-400 mb-4 floating"></i>
                         <h3 class="text-xl font-semibold mb-2">Contact</h3>
-                        <p class="text-gray-600">+20 123 456 789</p>
+                        <p class="text-gray-600">+20 155 890 5021</p>
                         <p class="text-gray-600">info@deliciouscafe.com</p>
                     </div>
                 </div>
             </div>
         </section>
 
-        <!-- About Section -->
-        <section id="about" class="py-20">
+        <!-- Menu Preview Section -->
+        <section id="menu" class="section-padding bg-gray-50">
             <div class="container mx-auto px-4">
-                <div class="flex flex-col md:flex-row items-center gap-12">
-                    <div class="md:w-1/2">
-                        <img 
-                            src="https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1170&q=80" 
-                            alt="Coffee preparation" 
-                            class="rounded-lg shadow-lg"
-                        />
-                    </div>
-                    <div class="md:w-1/2">
-                        <h2 class="text-4xl font-bold mb-6">Our Story</h2>
-                        <p class="text-gray-600 mb-6">
-                            Founded in 2020, Delicious Cafe has been serving the finest coffee and cuisine to our beloved customers. 
-                            Our passion for quality and service excellence has made us one of the most popular destinations for coffee 
-                            lovers and food enthusiasts.
-                        </p>
-                        <div class="flex gap-6">
-                            <div class="flex items-center">
-                                <i data-lucide="chef-hat" class="w-8 h-8 text-yellow-400 mr-2"></i>
-                                <span class="font-semibold">Expert Chefs</span>
+                <h2 class="text-4xl font-bold text-center section-title">Our Menu</h2>
+                
+                <!-- Menu Categories -->
+                <div class="flex flex-wrap justify-center gap-4 mb-12">
+                    <button class="px-6 py-2 rounded-full bg-yellow-400 text-black font-semibold hover:bg-yellow-500 transition-all duration-300 transform hover:scale-105 category-btn active" onclick="filterMenu('all')">All</button>
+                    <button class="px-6 py-2 rounded-full bg-white text-gray-700 font-semibold hover:bg-yellow-400 hover:text-black transition-all duration-300 transform hover:scale-105 category-btn" onclick="filterMenu('coffee')">Coffee</button>
+                    <button class="px-6 py-2 rounded-full bg-white text-gray-700 font-semibold hover:bg-yellow-400 hover:text-black transition-all duration-300 transform hover:scale-105 category-btn" onclick="filterMenu('desserts')">Desserts</button>
+                    <button class="px-6 py-2 rounded-full bg-white text-gray-700 font-semibold hover:bg-yellow-400 hover:text-black transition-all duration-300 transform hover:scale-105 category-btn" onclick="filterMenu('breakfast')">Breakfast</button>
+                    <button class="px-6 py-2 rounded-full bg-white text-gray-700 font-semibold hover:bg-yellow-400 hover:text-black transition-all duration-300 transform hover:scale-105 category-btn" onclick="filterMenu('lunch')">Lunch</button>
+                </div>
+
+                <!-- Menu Items -->
+                <div class="menu-grid">
+                    <!-- Coffee Items -->
+                    <div class="menu-item coffee bg-white rounded-lg overflow-hidden shadow-lg animate-fade-in image-hover" style="animation-delay: 0.2s;">
+                        <div class="relative overflow-hidden">
+                            <img 
+                                src="https://images.unsplash.com/photo-1572442388796-11668a67e53d?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1035&q=80"
+                                alt="Cappuccino"
+                                class="w-full h-48 object-cover transform transition-transform duration-500 hover:scale-110"
+                            />
+                            <div class="absolute inset-0 bg-black bg-opacity-50 opacity-0 hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
+                                <div class="flex space-x-4">
+                                    <button onclick="addToCart('cappuccino', 'Cappuccino', 45, 'https://images.unsplash.com/photo-1572442388796-11668a67e53d?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1035&q=80')" class="bg-yellow-400 text-black px-4 py-2 rounded-full hover:bg-yellow-500 transition-all duration-300 transform hover:scale-105">
+                                        <i data-lucide="shopping-cart" class="h-5 w-5"></i>
+                                    </button>
+                                    <button onclick="orderNow('cappuccino')" class="bg-green-500 text-white px-4 py-2 rounded-full hover:bg-green-600 transition-all duration-300 transform hover:scale-105">
+                                        <i data-lucide="coffee" class="h-5 w-5"></i>
+                                    </button>
+                                </div>
                             </div>
-                            <div class="flex items-center">
-                                <i data-lucide="utensils-crossed" class="w-8 h-8 text-yellow-400 mr-2"></i>
-                                <span class="font-semibold">Quality Food</span>
+                        </div>
+                        <div class="p-6">
+                            <div class="flex justify-between items-center mb-2">
+                                <h3 class="text-xl font-semibold">Cappuccino</h3>
+                                <span class="text-yellow-400 font-bold price-tag">45 EGP</span>
+                            </div>
+                            <p class="text-gray-600 text-sm mb-4">Rich espresso topped with foamy milk and a sprinkle of cocoa</p>
+                            <div class="flex items-center mb-2">
+                                <div class="flex text-yellow-400">
+                                    <i data-lucide="star" class="h-4 w-4 fill-current"></i>
+                                    <i data-lucide="star" class="h-4 w-4 fill-current"></i>
+                                    <i data-lucide="star" class="h-4 w-4 fill-current"></i>
+                                    <i data-lucide="star" class="h-4 w-4 fill-current"></i>
+                                    <i data-lucide="star" class="h-4 w-4 fill-current"></i>
+                                </div>
+                                <span class="text-sm text-gray-500 ml-2">(128 تقييم)</span>
+                            </div>
+                            <div class="flex items-center space-x-2">
+                                <button onclick="showReviews('cappuccino')" class="text-sm text-yellow-400 hover:underline">عرض التقييمات</button>
+                                <button onclick="addReview('cappuccino')" class="text-sm text-yellow-400 hover:underline">أضف تقييمك</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Latte -->
+                    <div class="menu-item coffee bg-white rounded-lg overflow-hidden shadow-lg animate-fade-in image-hover" style="animation-delay: 0.4s;">
+                        <div class="relative overflow-hidden">
+                            <img 
+                                src="https://images.unsplash.com/photo-1544145945-f90425340c7e?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=774&q=80"
+                                alt="Latte"
+                                class="w-full h-48 object-cover transform transition-transform duration-500 hover:scale-110"
+                            />
+                            <div class="absolute inset-0 bg-black bg-opacity-50 opacity-0 hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
+                                <div class="flex space-x-4">
+                                    <button onclick="addToCart('latte', 'Latte', 40, 'https://images.unsplash.com/photo-1544145945-f90425340c7e?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=774&q=80')" class="bg-yellow-400 text-black px-4 py-2 rounded-full hover:bg-yellow-500 transition-all duration-300 transform hover:scale-105">
+                                        <i data-lucide="shopping-cart" class="h-5 w-5"></i>
+                                    </button>
+                                    <button onclick="orderNow('latte')" class="bg-green-500 text-white px-4 py-2 rounded-full hover:bg-green-600 transition-all duration-300 transform hover:scale-105">
+                                        <i data-lucide="coffee" class="h-5 w-5"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="p-6">
+                            <div class="flex justify-between items-center mb-2">
+                                <h3 class="text-xl font-semibold">Latte</h3>
+                                <span class="text-yellow-400 font-bold price-tag">40 EGP</span>
+                            </div>
+                            <p class="text-gray-600 text-sm mb-4">Smooth espresso with steamed milk and a light layer of foam</p>
+                            <div class="flex items-center mb-2">
+                                <div class="flex text-yellow-400">
+                                    <i data-lucide="star" class="h-4 w-4 fill-current"></i>
+                                    <i data-lucide="star" class="h-4 w-4 fill-current"></i>
+                                    <i data-lucide="star" class="h-4 w-4 fill-current"></i>
+                                    <i data-lucide="star" class="h-4 w-4 fill-current"></i>
+                                    <i data-lucide="star-half" class="h-4 w-4 fill-current"></i>
+                                </div>
+                                <span class="text-sm text-gray-500 ml-2">(95 تقييم)</span>
+                            </div>
+                            <div class="flex items-center space-x-2">
+                                <button onclick="showReviews('latte')" class="text-sm text-yellow-400 hover:underline">عرض التقييمات</button>
+                                <button onclick="addReview('latte')" class="text-sm text-yellow-400 hover:underline">أضف تقييمك</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Dessert Items -->
+                    <div class="menu-item desserts bg-white rounded-lg overflow-hidden shadow-lg animate-fade-in image-hover" style="animation-delay: 0.6s;">
+                        <div class="relative overflow-hidden">
+                            <img 
+                                src="https://images.unsplash.com/photo-1578985545062-69928b1d9587?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1089&q=80"
+                                alt="Chocolate Cake"
+                                class="w-full h-48 object-cover transform transition-transform duration-500 hover:scale-110"
+                            />
+                            <div class="absolute inset-0 bg-black bg-opacity-50 opacity-0 hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
+                                <div class="flex space-x-4">
+                                    <button onclick="addToCart('chocolate-cake', 'Chocolate Cake', 65, 'https://images.unsplash.com/photo-1578985545062-69928b1d9587?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1089&q=80')" class="bg-yellow-400 text-black px-4 py-2 rounded-full hover:bg-yellow-500 transition-all duration-300 transform hover:scale-105">
+                                        <i data-lucide="shopping-cart" class="h-5 w-5"></i>
+                                    </button>
+                                    <button onclick="orderNow('chocolate-cake')" class="bg-green-500 text-white px-4 py-2 rounded-full hover:bg-green-600 transition-all duration-300 transform hover:scale-105">
+                                        <i data-lucide="coffee" class="h-5 w-5"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="p-6">
+                            <div class="flex justify-between items-center mb-2">
+                                <h3 class="text-xl font-semibold">Chocolate Cake</h3>
+                                <span class="text-yellow-400 font-bold price-tag">65 EGP</span>
+                            </div>
+                            <p class="text-gray-600 text-sm mb-4">Rich chocolate layers with dark chocolate ganache</p>
+                            <div class="flex items-center mb-2">
+                                <div class="flex text-yellow-400">
+                                    <i data-lucide="star" class="h-4 w-4 fill-current"></i>
+                                    <i data-lucide="star" class="h-4 w-4 fill-current"></i>
+                                    <i data-lucide="star" class="h-4 w-4 fill-current"></i>
+                                    <i data-lucide="star" class="h-4 w-4 fill-current"></i>
+                                    <i data-lucide="star" class="h-4 w-4 fill-current"></i>
+                                </div>
+                                <span class="text-sm text-gray-500 ml-2">(156 تقييم)</span>
+                            </div>
+                            <div class="flex items-center space-x-2">
+                                <button onclick="showReviews('chocolate-cake')" class="text-sm text-yellow-400 hover:underline">عرض التقييمات</button>
+                                <button onclick="addReview('chocolate-cake')" class="text-sm text-yellow-400 hover:underline">أضف تقييمك</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Breakfast Items -->
+                    <div class="menu-item breakfast bg-white rounded-lg overflow-hidden shadow-lg animate-fade-in image-hover" style="animation-delay: 0.2s;">
+                        <div class="relative overflow-hidden">
+                            <img 
+                                src="https://images.unsplash.com/photo-1533089860892-a7c6f0a88666?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1170&q=80"
+                                alt="Breakfast Special"
+                                class="w-full h-48 object-cover transform transition-transform duration-500 hover:scale-110"
+                            />
+                            <div class="absolute inset-0 bg-black bg-opacity-50 opacity-0 hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
+                                <div class="flex space-x-4">
+                                    <button onclick="addToCart('breakfast-special', 'Breakfast Special', 85, 'https://images.unsplash.com/photo-1533089860892-a7c6f0a88666?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1170&q=80')" class="bg-yellow-400 text-black px-4 py-2 rounded-full hover:bg-yellow-500 transition-all duration-300 transform hover:scale-105">
+                                        <i data-lucide="shopping-cart" class="h-5 w-5"></i>
+                                    </button>
+                                    <button onclick="orderNow('breakfast-special')" class="bg-green-500 text-white px-4 py-2 rounded-full hover:bg-green-600 transition-all duration-300 transform hover:scale-105">
+                                        <i data-lucide="coffee" class="h-5 w-5"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="p-6">
+                            <div class="flex justify-between items-center mb-2">
+                                <h3 class="text-xl font-semibold">Breakfast Special</h3>
+                                <span class="text-yellow-400 font-bold price-tag">85 EGP</span>
+                            </div>
+                            <p class="text-gray-600 text-sm mb-4">Eggs, toast, fresh juice, and your choice of coffee</p>
+                            <div class="flex items-center mb-2">
+                                <div class="flex text-yellow-400">
+                                    <i data-lucide="star" class="h-4 w-4 fill-current"></i>
+                                    <i data-lucide="star" class="h-4 w-4 fill-current"></i>
+                                    <i data-lucide="star" class="h-4 w-4 fill-current"></i>
+                                    <i data-lucide="star" class="h-4 w-4 fill-current"></i>
+                                    <i data-lucide="star" class="h-4 w-4 fill-current"></i>
+                                </div>
+                                <span class="text-sm text-gray-500 ml-2">(203 تقييم)</span>
+                            </div>
+                            <div class="flex items-center space-x-2">
+                                <button onclick="showReviews('breakfast-special')" class="text-sm text-yellow-400 hover:underline">عرض التقييمات</button>
+                                <button onclick="addReview('breakfast-special')" class="text-sm text-yellow-400 hover:underline">أضف تقييمك</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Lunch Items -->
+                    <div class="menu-item lunch bg-white rounded-lg overflow-hidden shadow-lg animate-fade-in image-hover" style="animation-delay: 0.4s;">
+                        <div class="relative overflow-hidden">
+                            <img 
+                                src="https://images.unsplash.com/photo-1546069901-ba9599a7e63c?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1170&q=80"
+                                alt="Healthy Bowl"
+                                class="w-full h-48 object-cover transform transition-transform duration-500 hover:scale-110"
+                            />
+                            <div class="absolute inset-0 bg-black bg-opacity-50 opacity-0 hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
+                                <div class="flex space-x-4">
+                                    <button onclick="addToCart('healthy-bowl', 'Healthy Bowl', 75, 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1170&q=80')" class="bg-yellow-400 text-black px-4 py-2 rounded-full hover:bg-yellow-500 transition-all duration-300 transform hover:scale-105">
+                                        <i data-lucide="shopping-cart" class="h-5 w-5"></i>
+                                    </button>
+                                    <button onclick="orderNow('healthy-bowl')" class="bg-green-500 text-white px-4 py-2 rounded-full hover:bg-green-600 transition-all duration-300 transform hover:scale-105">
+                                        <i data-lucide="coffee" class="h-5 w-5"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="p-6">
+                            <div class="flex justify-between items-center mb-2">
+                                <h3 class="text-xl font-semibold">Healthy Bowl</h3>
+                                <span class="text-yellow-400 font-bold price-tag">75 EGP</span>
+                            </div>
+                            <p class="text-gray-600 text-sm mb-4">Quinoa, avocado, grilled chicken, and fresh vegetables</p>
+                            <div class="flex items-center mb-2">
+                                <div class="flex text-yellow-400">
+                                    <i data-lucide="star" class="h-4 w-4 fill-current"></i>
+                                    <i data-lucide="star" class="h-4 w-4 fill-current"></i>
+                                    <i data-lucide="star" class="h-4 w-4 fill-current"></i>
+                                    <i data-lucide="star" class="h-4 w-4 fill-current"></i>
+                                    <i data-lucide="star-half" class="h-4 w-4 fill-current"></i>
+                                </div>
+                                <span class="text-sm text-gray-500 ml-2">(87 تقييم)</span>
+                            </div>
+                            <div class="flex items-center space-x-2">
+                                <button onclick="showReviews('healthy-bowl')" class="text-sm text-yellow-400 hover:underline">عرض التقييمات</button>
+                                <button onclick="addReview('healthy-bowl')" class="text-sm text-yellow-400 hover:underline">أضف تقييمك</button>
                             </div>
                         </div>
                     </div>
@@ -108,43 +479,305 @@
             </div>
         </section>
 
-        <!-- Menu Preview Section -->
-        <section id="menu" class="py-20 bg-gray-50">
+        <!-- Special Offers Section -->
+        <section class="section-padding bg-yellow-400">
             <div class="container mx-auto px-4">
-                <h2 class="text-4xl font-bold text-center mb-12">Our Popular Items</h2>
+                <h2 class="text-3xl md:text-4xl font-bold text-center mb-12 text-black">Special Offers</h2>
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
-                    <div class="bg-white rounded-lg overflow-hidden shadow-lg">
-                        <img 
-                            src="https://images.unsplash.com/photo-1572442388796-11668a67e53d?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1035&q=80"
-                            alt="Cappuccino"
-                            class="w-full h-48 object-cover"
-                        />
-                        <div class="p-6">
-                            <h3 class="text-xl font-semibold mb-2">Cappuccino</h3>
-                            <p class="text-yellow-400 font-bold">45 EGP</p>
+                    <div class="bg-white rounded-lg p-6 text-center transform transition hover:scale-105 special-offer">
+                        <i data-lucide="clock" class="w-12 h-12 mx-auto text-yellow-400 mb-4"></i>
+                        <h3 class="text-xl font-semibold mb-2">Happy Hour</h3>
+                        <p class="text-gray-600">50% off on all drinks</p>
+                        <p class="text-sm text-gray-500 mt-2">Every day from 2 PM to 5 PM</p>
+                    </div>
+                    <div class="bg-white rounded-lg p-6 text-center transform transition hover:scale-105 special-offer">
+                        <i data-lucide="users" class="w-12 h-12 mx-auto text-yellow-400 mb-4"></i>
+                        <h3 class="text-xl font-semibold mb-2">Group Discount</h3>
+                        <p class="text-gray-600">20% off for groups of 5 or more</p>
+                        <p class="text-sm text-gray-500 mt-2">Valid on all menu items</p>
+                    </div>
+                    <div class="bg-white rounded-lg p-6 text-center transform transition hover:scale-105 special-offer">
+                        <i data-lucide="gift" class="w-12 h-12 mx-auto text-yellow-400 mb-4"></i>
+                        <h3 class="text-xl font-semibold mb-2">Birthday Special</h3>
+                        <p class="text-gray-600">Free dessert on your birthday</p>
+                        <p class="text-sm text-gray-500 mt-2">Show your ID to claim</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Contact Section -->
+        <section id="contact" class="section-padding">
+            <div class="container mx-auto px-4">
+                <h2 class="text-3xl md:text-4xl font-bold text-center mb-12">Contact Us</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-12">
+                    <div>
+                        <form class="space-y-6">
+                            <div>
+                                <label class="block text-gray-700 mb-2">Name</label>
+                                <input type="text" class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:border-yellow-400 contact-input" placeholder="Your name">
+                            </div>
+                            <div>
+                                <label class="block text-gray-700 mb-2">Email</label>
+                                <input type="email" class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:border-yellow-400 contact-input" placeholder="Your email">
+                            </div>
+                            <div>
+                                <label class="block text-gray-700 mb-2">Message</label>
+                                <textarea class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:border-yellow-400 contact-input" rows="4" placeholder="Your message"></textarea>
+                            </div>
+                            <button type="submit" class="w-full bg-yellow-400 text-black px-6 py-3 rounded-lg font-semibold hover:bg-yellow-500 transition">
+                                Send Message
+                            </button>
+                        </form>
+                    </div>
+                    <div class="space-y-6">
+                        <div class="flex items-start space-x-4">
+                            <i data-lucide="map-pin" class="w-6 h-6 text-yellow-400 mt-1"></i>
+                            <div>
+                                <h3 class="font-semibold mb-1">Location</h3>
+                                <p class="text-gray-600">Mall of Egypt - 5th Settlement</p>
+                                <p class="text-gray-600">First Floor, Sadat City</p>
+                            </div>
+                        </div>
+                        <div class="flex items-start space-x-4">
+                            <i data-lucide="phone" class="w-6 h-6 text-yellow-400 mt-1"></i>
+                            <div>
+                                <h3 class="font-semibold mb-1">Phone</h3>
+                                <p class="text-gray-600">+20 155 890 5021</p>
+                            </div>
+                        </div>
+                        <div class="flex items-start space-x-4">
+                            <i data-lucide="mail" class="w-6 h-6 text-yellow-400 mt-1"></i>
+                            <div>
+                                <h3 class="font-semibold mb-1">Email</h3>
+                                <p class="text-gray-600">info@deliciouscafe.com</p>
+                            </div>
+                        </div>
+                        <div class="flex items-start space-x-4">
+                            <i data-lucide="clock" class="w-6 h-6 text-yellow-400 mt-1"></i>
+                            <div>
+                                <h3 class="font-semibold mb-1">Working Hours</h3>
+                                <p class="text-gray-600">Mon-Fri: 8AM - 10PM</p>
+                                <p class="text-gray-600">Sat-Sun: 9AM - 11PM</p>
+                            </div>
                         </div>
                     </div>
-                    <div class="bg-white rounded-lg overflow-hidden shadow-lg">
-                        <img 
-                            src="https://images.unsplash.com/photo-1578985545062-69928b1d9587?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1089&q=80"
-                            alt="Chocolate Cake"
-                            class="w-full h-48 object-cover"
-                        />
-                        <div class="p-6">
-                            <h3 class="text-xl font-semibold mb-2">Chocolate Cake</h3>
-                            <p class="text-yellow-400 font-bold">65 EGP</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Account Section -->
+        <section id="account" class="section-padding bg-gray-50">
+            <div class="container mx-auto px-4">
+                <h2 class="text-3xl md:text-4xl font-bold text-center mb-12">Account</h2>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-12">
+                    <!-- Login Form -->
+                    <div class="bg-white rounded-lg p-8 shadow-lg">
+                        <h3 class="text-2xl font-semibold mb-6">Login</h3>
+                        <form id="loginForm" class="space-y-6">
+                            <div>
+                                <label class="block text-gray-700 mb-2">Email</label>
+                                <input type="email" class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:border-yellow-400 contact-input" placeholder="Your email" required>
+                            </div>
+                            <div>
+                                <label class="block text-gray-700 mb-2">Password</label>
+                                <input type="password" class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:border-yellow-400 contact-input" placeholder="Your password" required>
+                            </div>
+                            <button type="submit" class="w-full bg-yellow-400 text-black px-6 py-3 rounded-lg font-semibold hover:bg-yellow-500 transition">
+                                Login
+                            </button>
+                            <p class="text-center text-gray-600">
+                                Don't have an account? <a href="#" onclick="toggleForms()" class="text-yellow-400 hover:underline">Sign up</a>
+                            </p>
+                        </form>
+                    </div>
+                    
+                    <!-- Sign Up Form -->
+                    <div id="signupForm" class="bg-white rounded-lg p-8 shadow-lg hidden">
+                        <h3 class="text-2xl font-semibold mb-6">Create Account</h3>
+                        <form class="space-y-6">
+                            <div>
+                                <label class="block text-gray-700 mb-2">Full Name</label>
+                                <input type="text" class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:border-yellow-400 contact-input" placeholder="Your full name" required>
+                            </div>
+                            <div>
+                                <label class="block text-gray-700 mb-2">Email</label>
+                                <input type="email" class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:border-yellow-400 contact-input" placeholder="Your email" required>
+                            </div>
+                            <div>
+                                <label class="block text-gray-700 mb-2">Password</label>
+                                <input type="password" class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:border-yellow-400 contact-input" placeholder="Create a password" required>
+                            </div>
+                            <div>
+                                <label class="block text-gray-700 mb-2">Confirm Password</label>
+                                <input type="password" class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:border-yellow-400 contact-input" placeholder="Confirm your password" required>
+                            </div>
+                            <div>
+                                <label class="block text-gray-700 mb-2">Phone Number</label>
+                                <input type="tel" class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:border-yellow-400 contact-input" placeholder="Your phone number" required>
+                            </div>
+                            <div>
+                                <label class="block text-gray-700 mb-2">Address</label>
+                                <textarea class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:border-yellow-400 contact-input" rows="2" placeholder="Your delivery address" required></textarea>
+                            </div>
+                            <button type="submit" class="w-full bg-yellow-400 text-black px-6 py-3 rounded-lg font-semibold hover:bg-yellow-500 transition">
+                                Create Account
+                            </button>
+                            <p class="text-center text-gray-600">
+                                Already have an account? <a href="#" onclick="toggleForms()" class="text-yellow-400 hover:underline">Login</a>
+                            </p>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Pre-Order Section -->
+        <section id="preorder" class="section-padding bg-white">
+            <div class="container mx-auto px-4">
+                <h2 class="text-3xl md:text-4xl font-bold text-center mb-12">Pre-Order</h2>
+                
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                    <div class="bg-gray-50 rounded-lg p-8 shadow-lg">
+                        <h3 class="text-2xl font-semibold mb-4">How It Works</h3>
+                        <ol class="space-y-4">
+                            <li class="flex items-start">
+                                <span class="bg-yellow-400 text-black rounded-full w-8 h-8 flex items-center justify-center mr-3 flex-shrink-0">1</span>
+                                <p>Create an account or login to your existing account</p>
+                            </li>
+                            <li class="flex items-start">
+                                <span class="bg-yellow-400 text-black rounded-full w-8 h-8 flex items-center justify-center mr-3 flex-shrink-0">2</span>
+                                <p>Browse our menu and add items to your cart</p>
+                            </li>
+                            <li class="flex items-start">
+                                <span class="bg-yellow-400 text-black rounded-full w-8 h-8 flex items-center justify-center mr-3 flex-shrink-0">3</span>
+                                <p>Choose your preferred pickup time</p>
+                            </li>
+                            <li class="flex items-start">
+                                <span class="bg-yellow-400 text-black rounded-full w-8 h-8 flex items-center justify-center mr-3 flex-shrink-0">4</span>
+                                <p>Complete your order and pay</p>
+                            </li>
+                        </ol>
+                    </div>
+                    
+                    <div class="bg-gray-50 rounded-lg p-8 shadow-lg">
+                        <h3 class="text-2xl font-semibold mb-4">Delivery Service</h3>
+                        <p class="mb-4">We offer delivery service to your location. Our delivery partners will bring your order right to your doorstep.</p>
+                        <ul class="space-y-2">
+                            <li class="flex items-center">
+                                <i data-lucide="check" class="h-5 w-5 text-yellow-400 mr-2"></i>
+                                <span>Fast delivery within 30-45 minutes</span>
+                            </li>
+                            <li class="flex items-center">
+                                <i data-lucide="check" class="h-5 w-5 text-yellow-400 mr-2"></i>
+                                <span>Track your order in real-time</span>
+                            </li>
+                            <li class="flex items-center">
+                                <i data-lucide="check" class="h-5 w-5 text-yellow-400 mr-2"></i>
+                                <span>Contactless delivery available</span>
+                            </li>
+                            <li class="flex items-center">
+                                <i data-lucide="check" class="h-5 w-5 text-yellow-400 mr-2"></i>
+                                <span>Delivery fee based on distance</span>
+                            </li>
+                        </ul>
+                    </div>
+                    
+                    <div class="bg-gray-50 rounded-lg p-8 shadow-lg">
+                        <h3 class="text-2xl font-semibold mb-4">Order Status</h3>
+                        <div class="space-y-4">
+                            <div class="border-l-4 border-yellow-400 pl-4">
+                                <p class="font-semibold">Order #12345</p>
+                                <p class="text-sm text-gray-600">2 Cappuccino, 1 Chocolate Cake</p>
+                                <p class="text-sm text-yellow-400">Preparing your order</p>
+                            </div>
+                            <div class="border-l-4 border-green-500 pl-4">
+                                <p class="font-semibold">Order #12344</p>
+                                <p class="text-sm text-gray-600">1 Latte, 1 Breakfast Special</p>
+                                <p class="text-sm text-green-500">Delivered</p>
+                            </div>
+                            <a href="#" class="block text-center text-yellow-400 hover:underline">View all orders</a>
                         </div>
                     </div>
-                    <div class="bg-white rounded-lg overflow-hidden shadow-lg">
-                        <img 
-                            src="https://images.unsplash.com/photo-1533089860892-a7c6f0a88666?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1170&q=80"
-                            alt="Breakfast Special"
-                            class="w-full h-48 object-cover"
-                        />
-                        <div class="p-6">
-                            <h3 class="text-xl font-semibold mb-2">Breakfast Special</h3>
-                            <p class="text-yellow-400 font-bold">85 EGP</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Cart Section -->
+        <section id="cart" class="section-padding bg-gray-50">
+            <div class="container mx-auto px-4">
+                <h2 class="text-3xl md:text-4xl font-bold text-center mb-12">Your Cart</h2>
+                
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                    <div class="md:col-span-2">
+                        <div class="bg-white rounded-lg p-6 shadow-lg mb-6">
+                            <h3 class="text-xl font-semibold mb-4">Cart Items</h3>
+                            <div id="cart-items" class="space-y-4">
+                                <!-- Cart items will be dynamically added here -->
+                                <div class="flex items-center justify-between border-b pb-4">
+                                    <div class="flex items-center">
+                                        <img src="https://images.unsplash.com/photo-1572442388796-11668a67e53d?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1035&q=80" alt="Cappuccino" class="w-16 h-16 object-cover rounded-lg mr-4">
+                                        <div>
+                                            <h4 class="font-semibold">Cappuccino</h4>
+                                            <p class="text-sm text-gray-600">45 EGP</p>
+                                        </div>
+                                    </div>
+                                    <div class="flex items-center">
+                                        <button class="bg-gray-200 rounded-full w-8 h-8 flex items-center justify-center">-</button>
+                                        <span class="mx-3">1</span>
+                                        <button class="bg-gray-200 rounded-full w-8 h-8 flex items-center justify-center">+</button>
+                                        <button class="ml-4 text-red-500">
+                                            <i data-lucide="trash-2" class="h-5 w-5"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
+                    </div>
+                    
+                    <div class="bg-white rounded-lg p-6 shadow-lg h-fit">
+                        <h3 class="text-xl font-semibold mb-4">Order Summary</h3>
+                        <div class="space-y-3 mb-6">
+                            <div class="flex justify-between">
+                                <span>Subtotal</span>
+                                <span>45 EGP</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span>Delivery Fee</span>
+                                <span>15 EGP</span>
+                            </div>
+                            <div class="border-t pt-3 font-semibold flex justify-between">
+                                <span>Total</span>
+                                <span>60 EGP</span>
+                            </div>
+                        </div>
+                        
+                        <div class="mb-6">
+                            <label class="block text-gray-700 mb-2">Delivery Time</label>
+                            <select class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:border-yellow-400 contact-input">
+                                <option>As soon as possible</option>
+                                <option>Schedule for later</option>
+                            </select>
+                        </div>
+                        
+                        <div class="mb-6">
+                            <label class="block text-gray-700 mb-2">Payment Method</label>
+                            <div class="space-y-2">
+                                <div class="flex items-center">
+                                    <input type="radio" name="payment" id="cash" class="mr-2">
+                                    <label for="cash">Cash on Delivery</label>
+                                </div>
+                                <div class="flex items-center">
+                                    <input type="radio" name="payment" id="card" class="mr-2">
+                                    <label for="card">Credit/Debit Card</label>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <button class="w-full bg-yellow-400 text-black px-6 py-3 rounded-lg font-semibold hover:bg-yellow-500 transition">
+                            Place Order
+                        </button>
                     </div>
                 </div>
             </div>
@@ -158,11 +791,13 @@
                         <i data-lucide="coffee" class="h-8 w-8 text-yellow-400"></i>
                         <span class="ml-2 text-2xl font-bold">Delicious Cafe</span>
                     </div>
-                    <div class="flex flex-col md:flex-row gap-6 md:gap-12">
-                        <a href="#home" class="hover-yellow">Home</a>
-                        <a href="#about" class="hover-yellow">About</a>
-                        <a href="#menu" class="hover-yellow">Menu</a>
-                        <a href="#contact" class="hover-yellow">Contact</a>
+                    <div class="flex flex-col md:flex-row gap-4 md:gap-12">
+                        <a href="#home" class="hover-yellow text-center footer-link">Home</a>
+                        <a href="#about" class="hover-yellow text-center footer-link">About</a>
+                        <a href="#menu" class="hover-yellow text-center footer-link">Menu</a>
+                        <a href="#contact" class="hover-yellow text-center footer-link">Contact</a>
+                        <a href="#account" class="hover-yellow text-center footer-link">Account</a>
+                        <a href="#cart" class="hover-yellow text-center footer-link">Cart</a>
                     </div>
                 </div>
                 <div class="mt-8 text-center text-gray-400">
@@ -172,9 +807,112 @@
         </footer>
     </div>
 
+    <!-- Payment Modal -->
+    <div id="paymentModal" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50">
+        <div class="flex items-center justify-center min-h-screen px-4">
+            <div class="bg-white rounded-lg max-w-md w-full p-6">
+                <div class="flex justify-between items-center mb-4">
+                    <h3 class="text-xl font-semibold">اختر طريقة الدفع</h3>
+                    <button onclick="closePaymentModal()" class="text-gray-500 hover:text-gray-700">
+                        <i data-lucide="x" class="h-6 w-6"></i>
+                    </button>
+                </div>
+                <div class="space-y-4">
+                    <div class="flex items-center p-4 border rounded-lg hover:bg-gray-50 cursor-pointer" onclick="selectPayment('fawry')">
+                        <img src="https://www.fawry.com/wp-content/uploads/2019/03/fawry-logo.png" alt="Fawry" class="h-8 mr-4">
+                        <span>فوري</span>
+                    </div>
+                    <div class="flex items-center p-4 border rounded-lg hover:bg-gray-50 cursor-pointer" onclick="selectPayment('vodafone')">
+                        <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/0/09/Vodafone_Logo.svg/2560px-Vodafone_Logo.svg.png" alt="Vodafone Cash" class="h-8 mr-4">
+                        <span>فودافون كاش</span>
+                    </div>
+                    <div class="flex items-center p-4 border rounded-lg hover:bg-gray-50 cursor-pointer" onclick="selectPayment('credit')">
+                        <i data-lucide="credit-card" class="h-8 w-8 mr-4 text-yellow-400"></i>
+                        <span>بطاقة ائتمان</span>
+                    </div>
+                    <div class="flex items-center p-4 border rounded-lg hover:bg-gray-50 cursor-pointer" onclick="selectPayment('cash')">
+                        <i data-lucide="banknote" class="h-8 w-8 mr-4 text-yellow-400"></i>
+                        <span>الدفع عند الاستلام</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Reviews Modal -->
+    <div id="reviewsModal" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50">
+        <div class="flex items-center justify-center min-h-screen px-4">
+            <div class="bg-white rounded-lg max-w-2xl w-full p-6">
+                <div class="flex justify-between items-center mb-4">
+                    <h3 class="text-xl font-semibold">تقييمات المنتج</h3>
+                    <button onclick="closeReviewsModal()" class="text-gray-500 hover:text-gray-700">
+                        <i data-lucide="x" class="h-6 w-6"></i>
+                    </button>
+                </div>
+                <div id="reviewsList" class="space-y-4 max-h-96 overflow-y-auto">
+                    <!-- Reviews will be dynamically added here -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add Review Modal -->
+    <div id="addReviewModal" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50">
+        <div class="flex items-center justify-center min-h-screen px-4">
+            <div class="bg-white rounded-lg max-w-md w-full p-6">
+                <div class="flex justify-between items-center mb-4">
+                    <h3 class="text-xl font-semibold">أضف تقييمك</h3>
+                    <button onclick="closeAddReviewModal()" class="text-gray-500 hover:text-gray-700">
+                        <i data-lucide="x" class="h-6 w-6"></i>
+                    </button>
+                </div>
+                <form id="reviewForm" class="space-y-4">
+                    <div>
+                        <label class="block text-gray-700 mb-2">التقييم</label>
+                        <div class="flex space-x-2">
+                            <button type="button" class="text-2xl text-gray-300 hover:text-yellow-400" onclick="setRating(1)">★</button>
+                            <button type="button" class="text-2xl text-gray-300 hover:text-yellow-400" onclick="setRating(2)">★</button>
+                            <button type="button" class="text-2xl text-gray-300 hover:text-yellow-400" onclick="setRating(3)">★</button>
+                            <button type="button" class="text-2xl text-gray-300 hover:text-yellow-400" onclick="setRating(4)">★</button>
+                            <button type="button" class="text-2xl text-gray-300 hover:text-yellow-400" onclick="setRating(5)">★</button>
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block text-gray-700 mb-2">تعليقك</label>
+                        <textarea class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:border-yellow-400" rows="4" placeholder="اكتب تعليقك هنا"></textarea>
+                    </div>
+                    <button type="submit" class="w-full bg-yellow-400 text-black px-6 py-3 rounded-lg font-semibold hover:bg-yellow-500 transition">
+                        إرسال التقييم
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+
     <script>
         // Initialize Lucide icons
         lucide.createIcons();
+
+        // Loading screen
+        window.addEventListener('load', () => {
+            const loadingScreen = document.querySelector('.loading-screen');
+            loadingScreen.classList.add('hidden');
+        });
+
+        // Mobile menu toggle
+        function toggleMobileMenu() {
+            const mobileMenu = document.getElementById('mobileMenu');
+            mobileMenu.classList.toggle('hidden');
+        }
+
+        // Toggle between login and signup forms
+        function toggleForms() {
+            const loginForm = document.getElementById('loginForm').parentElement;
+            const signupForm = document.getElementById('signupForm');
+            
+            loginForm.classList.toggle('hidden');
+            signupForm.classList.toggle('hidden');
+        }
 
         // Function to handle menu button click
         function scrollToMenu() {
@@ -192,7 +930,258 @@
                 if (section) {
                     section.scrollIntoView({ behavior: 'smooth' });
                 }
+                // Close mobile menu if open
+                const mobileMenu = document.getElementById('mobileMenu');
+                if (!mobileMenu.classList.contains('hidden')) {
+                    mobileMenu.classList.add('hidden');
+                }
             });
+        });
+
+        // Menu filtering function
+        function filterMenu(category) {
+            const menuItems = document.querySelectorAll('.menu-item');
+            const buttons = document.querySelectorAll('.category-btn');
+            
+            // Update button styles
+            buttons.forEach(button => {
+                if (button.getAttribute('onclick').includes(category)) {
+                    button.classList.remove('bg-white', 'text-gray-700');
+                    button.classList.add('bg-yellow-400', 'text-black');
+                } else {
+                    button.classList.remove('bg-yellow-400', 'text-black');
+                    button.classList.add('bg-white', 'text-gray-700');
+                }
+            });
+
+            // Show/hide menu items with animation
+            menuItems.forEach(item => {
+                if (category === 'all' || item.classList.contains(category)) {
+                    item.style.display = 'block';
+                    setTimeout(() => {
+                        item.style.opacity = '1';
+                        item.style.transform = 'translateY(0) translateZ(0)';
+                    }, 50);
+                } else {
+                    item.style.opacity = '0';
+                    item.style.transform = 'translateY(20px) translateZ(-20px)';
+                    setTimeout(() => {
+                        item.style.display = 'none';
+                    }, 300);
+                }
+            });
+        }
+
+        // Add scroll progress indicator
+        window.addEventListener('scroll', () => {
+            const scrollProgress = document.querySelector('.scroll-progress');
+            const scrollPx = document.documentElement.scrollTop;
+            const winHeightPx = document.documentElement.scrollHeight - document.documentElement.clientHeight;
+            const scrolled = `${(scrollPx / winHeightPx) * 100}%`;
+            scrollProgress.style.transform = `scaleX(${scrollPx / winHeightPx})`;
+        });
+
+        // Add intersection observer for fade-in animations
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.style.opacity = '1';
+                    entry.target.style.transform = 'translateY(0) translateZ(0)';
+                    entry.target.classList.add('visible');
+                }
+            });
+        }, {
+            threshold: 0.1
+        });
+
+        document.querySelectorAll('.animate-fade-in, .text-reveal').forEach((el) => observer.observe(el));
+
+        // Add parallax effect to hero section
+        window.addEventListener('scroll', () => {
+            const parallaxElements = document.querySelectorAll('.parallax');
+            const scrolled = window.pageYOffset;
+            
+            parallaxElements.forEach(element => {
+                const speed = 0.5;
+                element.style.transform = `translateY(${scrolled * speed}px)`;
+            });
+        });
+
+        // Add 3D tilt effect to cards
+        document.querySelectorAll('.card-3d').forEach(card => {
+            card.addEventListener('mousemove', (e) => {
+                const rect = card.getBoundingClientRect();
+                const x = e.clientX - rect.left;
+                const y = e.clientY - rect.top;
+                
+                const centerX = rect.width / 2;
+                const centerY = rect.height / 2;
+                
+                const rotateX = (y - centerY) / 10;
+                const rotateY = (centerX - x) / 10;
+                
+                card.style.transform = `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) translateZ(10px)`;
+            });
+            
+            card.addEventListener('mouseleave', () => {
+                card.style.transform = 'perspective(1000px) rotateX(0) rotateY(0) translateZ(0)';
+            });
+        });
+
+        // Add smooth reveal animation for menu items
+        document.querySelectorAll('.menu-item').forEach((item, index) => {
+            item.style.opacity = '0';
+            item.style.transform = 'translateY(20px) translateZ(-20px)';
+            item.style.transition = 'all 0.5s cubic-bezier(0.4, 0, 0.2, 1)';
+            item.style.transitionDelay = `${index * 0.1}s`;
+            
+            setTimeout(() => {
+                item.style.opacity = '1';
+                item.style.transform = 'translateY(0) translateZ(0)';
+            }, 100);
+        });
+
+        // Add hover effect to buttons
+        document.querySelectorAll('button').forEach(button => {
+            button.addEventListener('mouseenter', (e) => {
+                const rect = button.getBoundingClientRect();
+                const x = e.clientX - rect.left;
+                const y = e.clientY - rect.top;
+                
+                button.style.setProperty('--x', `${x}px`);
+                button.style.setProperty('--y', `${y}px`);
+            });
+        });
+
+        // Add cursor glow effect
+        const cursor = document.querySelector('.cursor-glow');
+        document.addEventListener('mousemove', (e) => {
+            cursor.style.left = `${e.clientX}px`;
+            cursor.style.top = `${e.clientY}px`;
+        });
+
+        // Add hover effect to interactive elements
+        document.querySelectorAll('a, button, .menu-item, .card-3d').forEach(element => {
+            element.addEventListener('mouseenter', () => {
+                cursor.style.width = '40px';
+                cursor.style.height = '40px';
+                cursor.style.background = 'rgba(251, 191, 36, 0.3)';
+            });
+            
+            element.addEventListener('mouseleave', () => {
+                cursor.style.width = '20px';
+                cursor.style.height = '20px';
+                cursor.style.background = 'rgba(251, 191, 36, 0.5)';
+            });
+        });
+
+        // Cart functionality
+        let cartCount = 0;
+        
+        function updateCartCount() {
+            document.getElementById('cart-count').textContent = cartCount;
+            document.getElementById('mobile-cart-count').textContent = cartCount;
+        }
+        
+        // Add to cart functionality (to be implemented)
+        function addToCart(itemId, itemName, itemPrice, itemImage) {
+            cartCount++;
+            updateCartCount();
+            
+            // Add item to cart (to be implemented)
+            // This would typically involve adding the item to the cart-items container
+            // and updating the order summary
+        }
+
+        // Payment functions
+        function showPaymentModal() {
+            document.getElementById('paymentModal').classList.remove('hidden');
+        }
+
+        function closePaymentModal() {
+            document.getElementById('paymentModal').classList.add('hidden');
+        }
+
+        function selectPayment(method) {
+            // Handle payment method selection
+            closePaymentModal();
+            // Redirect to payment gateway or show success message
+            alert('تم اختيار طريقة الدفع: ' + method);
+        }
+
+        // Reviews functions
+        function showReviews(productId) {
+            const reviewsModal = document.getElementById('reviewsModal');
+            const reviewsList = document.getElementById('reviewsList');
+            
+            // Clear existing reviews
+            reviewsList.innerHTML = '';
+            
+            // Add sample reviews (replace with actual reviews from backend)
+            const sampleReviews = [
+                { name: 'أحمد محمد', rating: 5, comment: 'قهوة رائعة!', date: '2024-03-15' },
+                { name: 'سارة أحمد', rating: 4, comment: 'جيدة جداً', date: '2024-03-14' },
+                { name: 'محمد علي', rating: 5, comment: 'أفضل قهوة في المدينة', date: '2024-03-13' }
+            ];
+            
+            sampleReviews.forEach(review => {
+                const reviewElement = document.createElement('div');
+                reviewElement.className = 'border-b pb-4';
+                reviewElement.innerHTML = `
+                    <div class="flex justify-between items-center mb-2">
+                        <span class="font-semibold">${review.name}</span>
+                        <div class="flex text-yellow-400">
+                            ${Array(review.rating).fill('<i data-lucide="star" class="h-4 w-4 fill-current"></i>').join('')}
+                        </div>
+                    </div>
+                    <p class="text-gray-600">${review.comment}</p>
+                    <span class="text-sm text-gray-500">${review.date}</span>
+                `;
+                reviewsList.appendChild(reviewElement);
+            });
+            
+            reviewsModal.classList.remove('hidden');
+            lucide.createIcons();
+        }
+
+        function closeReviewsModal() {
+            document.getElementById('reviewsModal').classList.add('hidden');
+        }
+
+        function addReview(productId) {
+            document.getElementById('addReviewModal').classList.remove('hidden');
+        }
+
+        function closeAddReviewModal() {
+            document.getElementById('addReviewModal').classList.add('hidden');
+        }
+
+        function setRating(rating) {
+            const stars = document.querySelectorAll('#reviewForm button');
+            stars.forEach((star, index) => {
+                if (index < rating) {
+                    star.classList.remove('text-gray-300');
+                    star.classList.add('text-yellow-400');
+                } else {
+                    star.classList.remove('text-yellow-400');
+                    star.classList.add('text-gray-300');
+                }
+            });
+        }
+
+        // Order functions
+        function orderNow(productId) {
+            showPaymentModal();
+        }
+
+        // Add sticky header functionality
+        window.addEventListener('scroll', () => {
+            const header = document.querySelector('.sticky-header');
+            if (window.scrollY > 100) {
+                header.classList.add('scrolled');
+            } else {
+                header.classList.remove('scrolled');
+            }
         });
     </script>
 </body>
