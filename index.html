@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Delicious Cafe</title>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        html {
+            scroll-behavior: smooth;
+        }
+        .hover-yellow:hover {
+            color: #facc15;
+            transition: all 0.3s ease;
+        }
+    </style>
+</head>
+<body>
+    <div class="min-h-screen bg-white">
+        <!-- Hero Section -->
+        <header class="relative h-screen">
+            <div 
+                class="absolute inset-0 bg-cover bg-center"
+                style="background-image: url('https://images.unsplash.com/photo-1554118811-1e0d58224f24?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=2047&q=80');"
+            >
+                <div class="absolute inset-0 bg-black bg-opacity-50"></div>
+            </div>
+            
+            <nav class="relative z-10 flex justify-between items-center px-8 py-6">
+                <div class="flex items-center">
+                    <i data-lucide="coffee" class="h-8 w-8 text-yellow-400"></i>
+                    <span class="ml-2 text-2xl font-bold text-white">Delicious Cafe</span>
+                </div>
+                <div class="hidden md:flex space-x-8 text-white">
+                    <a href="#home" class="hover-yellow">Home</a>
+                    <a href="#about" class="hover-yellow">About</a>
+                    <a href="#menu" class="hover-yellow">Menu</a>
+                    <a href="#contact" class="hover-yellow">Contact</a>
+                </div>
+            </nav>
+
+            <div class="relative z-10 flex flex-col items-center justify-center h-full text-center px-4">
+                <h1 class="text-5xl md:text-7xl font-bold text-white mb-6">Welcome to Delicious Cafe</h1>
+                <p class="text-xl text-gray-200 mb-8">Experience the finest coffee and cuisine in town</p>
+                <button onclick="scrollToMenu()" class="bg-yellow-400 text-black px-8 py-3 rounded-full font-semibold hover:bg-yellow-500 transition">
+                    View Menu
+                </button>
+            </div>
+        </header>
+
+        <!-- Features Section -->
+        <section class="py-20 bg-gray-50">
+            <div class="container mx-auto px-4">
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                    <div class="text-center">
+                        <i data-lucide="clock" class="w-12 h-12 mx-auto text-yellow-400 mb-4"></i>
+                        <h3 class="text-xl font-semibold mb-2">Open Hours</h3>
+                        <p class="text-gray-600">Mon-Fri: 8AM - 10PM</p>
+                        <p class="text-gray-600">Sat-Sun: 9AM - 11PM</p>
+                    </div>
+                    <div class="text-center">
+                        <i data-lucide="map-pin" class="w-12 h-12 mx-auto text-yellow-400 mb-4"></i>
+                        <h3 class="text-xl font-semibold mb-2">Location</h3>
+                        <p class="text-gray-600">123 Coffee Street</p>
+                        <p class="text-gray-600">Cairo, Egypt</p>
+                    </div>
+                    <div class="text-center">
+                        <i data-lucide="phone" class="w-12 h-12 mx-auto text-yellow-400 mb-4"></i>
+                        <h3 class="text-xl font-semibold mb-2">Contact</h3>
+                        <p class="text-gray-600">+20 123 456 789</p>
+                        <p class="text-gray-600">info@deliciouscafe.com</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- About Section -->
+        <section id="about" class="py-20">
+            <div class="container mx-auto px-4">
+                <div class="flex flex-col md:flex-row items-center gap-12">
+                    <div class="md:w-1/2">
+                        <img 
+                            src="https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1170&q=80" 
+                            alt="Coffee preparation" 
+                            class="rounded-lg shadow-lg"
+                        />
+                    </div>
+                    <div class="md:w-1/2">
+                        <h2 class="text-4xl font-bold mb-6">Our Story</h2>
+                        <p class="text-gray-600 mb-6">
+                            Founded in 2020, Delicious Cafe has been serving the finest coffee and cuisine to our beloved customers. 
+                            Our passion for quality and service excellence has made us one of the most popular destinations for coffee 
+                            lovers and food enthusiasts.
+                        </p>
+                        <div class="flex gap-6">
+                            <div class="flex items-center">
+                                <i data-lucide="chef-hat" class="w-8 h-8 text-yellow-400 mr-2"></i>
+                                <span class="font-semibold">Expert Chefs</span>
+                            </div>
+                            <div class="flex items-center">
+                                <i data-lucide="utensils-crossed" class="w-8 h-8 text-yellow-400 mr-2"></i>
+                                <span class="font-semibold">Quality Food</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Menu Preview Section -->
+        <section id="menu" class="py-20 bg-gray-50">
+            <div class="container mx-auto px-4">
+                <h2 class="text-4xl font-bold text-center mb-12">Our Popular Items</h2>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                    <div class="bg-white rounded-lg overflow-hidden shadow-lg">
+                        <img 
+                            src="https://images.unsplash.com/photo-1572442388796-11668a67e53d?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1035&q=80"
+                            alt="Cappuccino"
+                            class="w-full h-48 object-cover"
+                        />
+                        <div class="p-6">
+                            <h3 class="text-xl font-semibold mb-2">Cappuccino</h3>
+                            <p class="text-yellow-400 font-bold">45 EGP</p>
+                        </div>
+                    </div>
+                    <div class="bg-white rounded-lg overflow-hidden shadow-lg">
+                        <img 
+                            src="https://images.unsplash.com/photo-1578985545062-69928b1d9587?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1089&q=80"
+                            alt="Chocolate Cake"
+                            class="w-full h-48 object-cover"
+                        />
+                        <div class="p-6">
+                            <h3 class="text-xl font-semibold mb-2">Chocolate Cake</h3>
+                            <p class="text-yellow-400 font-bold">65 EGP</p>
+                        </div>
+                    </div>
+                    <div class="bg-white rounded-lg overflow-hidden shadow-lg">
+                        <img 
+                            src="https://images.unsplash.com/photo-1533089860892-a7c6f0a88666?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1170&q=80"
+                            alt="Breakfast Special"
+                            class="w-full h-48 object-cover"
+                        />
+                        <div class="p-6">
+                            <h3 class="text-xl font-semibold mb-2">Breakfast Special</h3>
+                            <p class="text-yellow-400 font-bold">85 EGP</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Footer -->
+        <footer class="bg-gray-900 text-white py-12">
+            <div class="container mx-auto px-4">
+                <div class="flex flex-col md:flex-row justify-between items-center">
+                    <div class="flex items-center mb-6 md:mb-0">
+                        <i data-lucide="coffee" class="h-8 w-8 text-yellow-400"></i>
+                        <span class="ml-2 text-2xl font-bold">Delicious Cafe</span>
+                    </div>
+                    <div class="flex flex-col md:flex-row gap-6 md:gap-12">
+                        <a href="#home" class="hover-yellow">Home</a>
+                        <a href="#about" class="hover-yellow">About</a>
+                        <a href="#menu" class="hover-yellow">Menu</a>
+                        <a href="#contact" class="hover-yellow">Contact</a>
+                    </div>
+                </div>
+                <div class="mt-8 text-center text-gray-400">
+                    <p>&copy; 2024 Delicious Cafe. All rights reserved.</p>
+                </div>
+            </div>
+        </footer>
+    </div>
+
+    <script>
+        // Initialize Lucide icons
+        lucide.createIcons();
+
+        // Function to handle menu button click
+        function scrollToMenu() {
+            const menuSection = document.getElementById('menu');
+            if (menuSection) {
+                menuSection.scrollIntoView({ behavior: 'smooth' });
+            }
+        }
+
+        // Handle navigation links
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const section = document.querySelector(this.getAttribute('href'));
+                if (section) {
+                    section.scrollIntoView({ behavior: 'smooth' });
+                }
+            });
+        });
+    </script>
+</body>
+</html>
